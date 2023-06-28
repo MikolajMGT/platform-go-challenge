@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: assets
+  namespace: dev
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: assets
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assets
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assets
+  template:
+    metadata:
+      labels:
+        app: assets
+    spec:
+      terminationGracePeriodSeconds: 5
+      volumes:
+        - name: local-config
+          configMap:
+            name: local-config
+            items:
+              - key: config.yaml
+                path: config.yaml
+      initContainers:
+        - name: wait-for-cassandra
+          image: busybox:1.28
+          command: [ 'sh', '-c', "until nslookup cassandra.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for cassandra; sleep 2; done" ]
+      containers:
+        - name: assets-service
+          image: assets-service:latest
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - mountPath: /etc/assets/
+              name: local-config
+          ports:
+            - containerPort: 8080
+              name: public

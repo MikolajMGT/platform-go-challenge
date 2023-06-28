@@ -1,0 +1,11 @@
+ARG APP_NAME=assets
+
+FROM alpine:3.18
+ARG APP_NAME
+
+COPY assets/build/assets-service /usr/local/bin/app/
+
+WORKDIR /usr/local/bin/app/
+
+ENV app_cmd="./${APP_NAME}-service"
+ENTRYPOINT $app_cmd

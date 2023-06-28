@@ -1,0 +1,10 @@
+service:
+  name: assets
+webserver:
+  port: 8080
+cassandra:
+  cluster:
+    ip: cassandra
+    keyspace: assets_service
+auth:
+  secret: Ao8Qg52wYPhIzND

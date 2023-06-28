@@ -1,0 +1,22 @@
+version: "3"
+services:
+  cassandra:
+    image: cassandra:4.1.2
+    volumes:
+      - ~/apps/cassandra:/var/lib/cassandra
+    expose:
+      - "9042"
+    ports:
+      - "9042:9042"
+  assets:
+    build: .
+    links:
+      - "cassandra"
+    depends_on:
+      - cassandra
+    volumes:
+      - .:/etc/assets
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
